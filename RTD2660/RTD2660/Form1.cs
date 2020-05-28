@@ -51,8 +51,6 @@ namespace RTD2660
                     serialPortcComboBox.Enabled = false;
                     buttonErase.Enabled = true;
                     buttonFlash.Enabled = true;
-
-
                 }
             }
             catch (System.SystemException ex)
@@ -86,8 +84,6 @@ namespace RTD2660
             serialPortcComboBox.SelectedIndex = serialPortcComboBox.Items.Count - 1;
         }
 
-
-
         private void button2_Click(object sender, EventArgs e)
         {
             char[] cmd = { 'E' };
@@ -100,19 +96,18 @@ namespace RTD2660
 
         private void button3_Click(object sender, EventArgs e)
         {
-
-
             char[] cmd = { 'W' };
             port.Write(cmd, 0, 1);
+
+            string info = port.ReadLine();
+            debugTextBox.AppendText(info + "\n");
 
             byte[] bytes = new byte[256];
             try
             {
-
                 using (FileStream fsSource = new FileStream(openFileDialog1.FileName,
                     FileMode.Open, FileAccess.Read))
                 {
-
                     // Read the source file into a byte array.
                     int numBytesToRead = (int)fsSource.Length;
                     int numBytesRead = 0;
@@ -180,16 +175,12 @@ namespace RTD2660
                 byte[] b = { 0 };
                 port.Write(b, 0, 1);
 
-
                 char answer = (char)port.ReadChar();
                 Console.WriteLine(ioEx.Message);
             }
 
-
-
-            string info = port.ReadLine();
+            info = port.ReadLine();
             debugTextBox.AppendText(info + "\n");
-
         }
 
         private void button4_Click(object sender, EventArgs e)

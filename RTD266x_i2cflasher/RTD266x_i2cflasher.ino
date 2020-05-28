@@ -33,11 +33,6 @@ void setup(void)
   Wire.setClock(400000);
 }
 
-uint8_t getch() {
-  while (!Serial.available());
-  return Serial.read();
-}
-
 void connection() {
 #if defined(__AVR__)
   uint8_t data;
@@ -86,29 +81,19 @@ void connection() {
 }
 
 void erase() {
-    EraseFlash();
+  Serial.println(F("Erasing..."));
+  EraseFlash();
+  Serial.println(F("done"));
 }
 
 void flash() {
-ProgramFlash(chip.size_kb * 1024);
-
-  /*
-  bool finished = false;
-  while (!finished) {
-    uint8_t buffer[256];
-    memset(buffer, 0xff, sizeof(buffer));
-    
-    char len = getch();
-    if (len == 0) {
-      finished = true;
-    } else {
-      for (int i = 0; i < len; i++) {
-        buffer[i] = getch();
-      }
-    }
-    Serial.print('1');
+  if (!chipConnected) {
+    Serial.print(F("Not ready to Flash. Connect..."));
+    connection();
+  } else {
+    Serial.println(F("Ready to Flash."));
   }
-  */
+  ProgramFlash(chip.size_kb * 1024);
 }
 
 void loop(void) 

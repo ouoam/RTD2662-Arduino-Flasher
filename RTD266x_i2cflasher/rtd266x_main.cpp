@@ -245,8 +245,6 @@ void EraseFlash() {
 }
 
 bool ProgramFlash(uint32_t chip_size) {
-  //uint32_t prog_size = f->size();
-
   EraseFlash();
 
   // Arduino i2c can only handle 16 bytes at a time!
@@ -254,7 +252,6 @@ bool ProgramFlash(uint32_t chip_size) {
   uint8_t b;
   uint32_t addr = 0;
   
-  //uint32_t remaining_len = prog_size;
   InitCRC();
   do
   {
@@ -283,9 +280,6 @@ bool ProgramFlash(uint32_t chip_size) {
       }
       Serial.print('1');
     }
-
-    
-    //remaining_len -= len;
 
     if (ShouldProgramPage(buffer, sizeof(buffer))) {
       // Set program size-1
@@ -317,7 +311,7 @@ bool ProgramFlash(uint32_t chip_size) {
 
   uint8_t data_crc = GetCRC();
   uint8_t chip_crc = SPIComputeCRC(0, addr - 1);
-  Serial.print(F("Received data CRC ")); Serial.println(data_crc, HEX);
+  Serial.print(F("Received data CRC ")); Serial.print(data_crc, HEX);
   Serial.print(F("Chip CRC ")); Serial.println(chip_crc, HEX);
   return data_crc == chip_crc;
 }
