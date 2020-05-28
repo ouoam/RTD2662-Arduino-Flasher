@@ -41,6 +41,6 @@ bool ProgramFlash(uint32_t chip_size);
 bool WriteBytesToAddr(uint8_t reg, uint8_t* values, uint8_t len);
 bool VerifyFlash(File *f, uint32_t chip_size);
 bool ShouldProgramPage(uint8_t* buffer, uint32_t size);
-bool SaveFlash(File *f, uint32_t chip_size);
+bool SaveFlash(uint32_t chip_size);
 
 #endif

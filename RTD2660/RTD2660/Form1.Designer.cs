@@ -78,7 +78,7 @@
             this.buttonErase.Size = new System.Drawing.Size(100, 28);
             this.buttonErase.TabIndex = 3;
             this.buttonErase.Text = "Erase";
-            this.buttonErase.UseVisualStyleBackColor = false;
+            this.buttonErase.UseVisualStyleBackColor = true;
             this.buttonErase.Click += new System.EventHandler(this.buttonErase_Click);
             // 
             // buttonFlash
@@ -196,6 +196,7 @@
             this.buttonSave.TabIndex = 14;
             this.buttonSave.Text = "Save";
             this.buttonSave.UseVisualStyleBackColor = true;
+            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
             // saveFileDialog1
             // 

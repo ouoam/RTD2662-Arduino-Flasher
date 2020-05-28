@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,7 +24,7 @@ namespace RTD2660
             port = new SerialPort();
 
             // Allow the user to set the appropriate properties.
-            port.BaudRate = 500000;
+            port.BaudRate = 250000;
             // Set the read/write timeouts
             port.ReadTimeout = 900;
             port.WriteTimeout = 900;
@@ -100,6 +100,8 @@ namespace RTD2660
 
         private void buttonFlash_Click(object sender, EventArgs e)
         {
+            progressBar.Value = 0;
+
             char[] cmd = { 'W' };
             port.Write(cmd, 0, 1);
 
@@ -213,6 +215,95 @@ namespace RTD2660
                 fileSaveTextBox.SelectionStart = fileSaveTextBox.Text.Length;
                 fileSaveTextBox.SelectionLength = 0;
             }
+        }
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            progressBar.Value = 0;
+
+            char[] cmd = { 'S' };
+            port.Write(cmd, 0, 1);
+
+            string info = port.ReadLine();
+            debugTextBox.AppendText(info + "\n");
+
+            info = port.ReadLine();
+            UInt32 len = UInt32.Parse(info);
+
+            byte[] bytes = new byte[128];
+            uint gCrc = 0;
+            try
+            {
+                using (FileStream fsSource = new FileStream(saveFileDialog1.FileName,
+                    FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    int numBytesRead = 0;
+                    
+                    while (true)
+                    {
+                        bool error = false;
+                        try
+                        {
+                            char answer = (char)port.ReadChar();
+                            if (answer == 'f') break;
+                            error = answer != 'r';
+                        }
+                        catch (System.TimeoutException ex)
+                        {
+                            error = true;
+                        }
+
+                        if (error)
+                        {
+                            debugTextBox.AppendText(String.Format("Errror at {0}\n", numBytesRead));
+                            break;
+                        }
+
+                        //port.Read(bytes, 0, 128);
+                        for (int i = 0; i < 128; i++)
+                        {
+                            int a = -1;
+                            while (a == -1)
+                            {
+                                a = port.ReadByte();
+                            }
+                            bytes[i] = (byte)a;
+
+                            gCrc ^= (uint)bytes[i] << 8;
+                            for (int j = 8; j != 0; j--)
+                            {
+                                if ((gCrc & 0x8000) != 0)
+                                    gCrc ^= (0x1070 << 3);
+                                gCrc <<= 1;
+                            }
+                        }
+
+                        char[] b = { 'g' };
+                        port.Write(b, 0, 1);
+
+                        numBytesRead += 128;
+
+                        label2.Text = String.Format("Loaded {0}", numBytesRead);
+                        progressBar.Value = ((int)(numBytesRead * 100 / len));
+
+                        Application.DoEvents();
+
+                        fsSource.Write(bytes, 0, 128);
+                    }
+                    fsSource.Close();
+                }
+            }
+            catch (FileNotFoundException ioEx)
+            {
+                byte[] b = { 0 };
+                port.Write(b, 0, 1);
+
+                char answer = (char)port.ReadChar();
+                Console.WriteLine(ioEx.Message);
+            }
+
+            info = port.ReadLine();
+            debugTextBox.AppendText(info + String.Format(" Program CRC {0:X}", (uint)(gCrc >> 8)) + "\n");
         }
     }
 }

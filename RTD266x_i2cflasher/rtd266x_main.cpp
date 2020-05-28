@@ -175,27 +175,33 @@ void SetupChipCommands(uint32_t jedec_id) {
 }
 
 
-bool SaveFlash(File *f, uint32_t chip_size) {
+bool SaveFlash(uint32_t chip_size) {
   uint8_t buffer[128];
   uint32_t addr = 0;
   InitCRC();
-  
+  Serial.println(chip_size);
   do {
-    Serial.print(F("Reading addr $")); Serial.println(addr, HEX);
-    
+    // Serial.print(F("Reading addr $")); Serial.println(addr, HEX);
+    Serial.write('r');
     SPIRead(addr, buffer, sizeof(buffer));
-    f->write(buffer, sizeof(buffer));
+    Serial.write(buffer, 128);
+    while (!Serial.available());
+    char tmp = Serial.read();
+    if (tmp != 'g') {
+      Serial.write('e');
+      return false;
+    }
     
     ProcessCRC(buffer, sizeof(buffer));
     addr += sizeof(buffer);
   } while (addr < chip_size);
-
-  Serial.println(F("Done"));
+  Serial.print('f');
+  //Serial.println(F("Done"));
 
   uint8_t data_crc = GetCRC();
   uint8_t chip_crc = SPIComputeCRC(0, chip_size - 1);
-  Serial.print(F("Received data CRC ")); Serial.println(data_crc, HEX);
-  Serial.print(F("Chip CRC ")); Serial.println(chip_crc, HEX);
+  Serial.print(F("Received data CRC ")); Serial.print(data_crc, HEX);
+  Serial.print(F(" Chip CRC ")); Serial.println(chip_crc, HEX);
   return data_crc == chip_crc;
 }
 
@@ -312,6 +318,6 @@ bool ProgramFlash(uint32_t chip_size) {
   uint8_t data_crc = GetCRC();
   uint8_t chip_crc = SPIComputeCRC(0, addr - 1);
   Serial.print(F("Received data CRC ")); Serial.print(data_crc, HEX);
-  Serial.print(F("Chip CRC ")); Serial.println(chip_crc, HEX);
+  Serial.print(F(" Chip CRC ")); Serial.println(chip_crc, HEX);
   return data_crc == chip_crc;
 }

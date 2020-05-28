@@ -27,10 +27,10 @@ FlashDesc chip;
 void setup(void) 
 {
   while (!Serial);
-  Serial.begin(500000);
+  Serial.begin(250000);
 
   Wire.begin();
-  Wire.setClock(400000);
+  Wire.setClock(200000);
 }
 
 void connection() {
@@ -96,6 +96,16 @@ void flash() {
   ProgramFlash(chip.size_kb * 1024);
 }
 
+void save() {
+  if (!chipConnected) {
+    Serial.print(F("Not ready to read. Connect..."));
+    connection();
+  } else {
+    Serial.println(F("Ready to read."));
+  }
+  SaveFlash(chip.size_kb * 1024);
+}
+
 void loop(void) 
 {
   while (!Serial.available());
@@ -111,6 +121,10 @@ void loop(void)
     case 'W':
       flash();
       Serial.println(F("Flash OK"));
+      break;
+    case 'S':
+      save();
+      Serial.println(F("Save OK"));
       break;
     case 'I':
       Serial.println(F("RTD FLASH TOOL"));
