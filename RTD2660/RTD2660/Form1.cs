@@ -303,7 +303,7 @@ namespace RTD2660
             }
 
             info = port.ReadLine();
-            debugTextBox.AppendText(info + String.Format(" Program CRC {0:X}", (uint)(gCrc >> 8)) + "\n");
+            debugTextBox.AppendText(info + String.Format(" Program CRC {0:X}", (uint)(gCrc >> 8)) + "\n\r");
         }
     }
 }

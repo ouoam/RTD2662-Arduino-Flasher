@@ -180,20 +180,26 @@ bool SaveFlash(uint32_t chip_size) {
   uint32_t addr = 0;
   InitCRC();
   Serial.println(chip_size);
+  uint16_t want = 0;
   do {
     // Serial.print(F("Reading addr $")); Serial.println(addr, HEX);
     Serial.write('r');
     SPIRead(addr, buffer, sizeof(buffer));
     Serial.write(buffer, 128);
-    while (!Serial.available());
-    char tmp = Serial.read();
-    if (tmp != 'g') {
-      Serial.write('e');
-      return false;
-    }
     
     ProcessCRC(buffer, sizeof(buffer));
     addr += sizeof(buffer);
+
+    want++;
+    if (want > 1000) while (!Serial.available());
+    while (Serial.available()) {
+      char tmp = Serial.read();
+      if (tmp != 'g') {
+        Serial.write('e');
+        return false;
+      }
+      want--;
+    }
   } while (addr < chip_size);
   Serial.print('f');
   //Serial.println(F("Done"));

@@ -116,15 +116,12 @@ void loop(void)
   switch (cmd) {
     case 'E':
       erase();
-      Serial.println(F("Erase OK"));
       break;
     case 'W':
       flash();
-      Serial.println(F("Flash OK"));
       break;
     case 'S':
       save();
-      Serial.println(F("Save OK"));
       break;
     case 'I':
       Serial.println(F("RTD FLASH TOOL"));
