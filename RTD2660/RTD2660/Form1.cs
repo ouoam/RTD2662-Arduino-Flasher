@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -31,7 +31,7 @@ namespace RTD2660
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonOpen_Click(object sender, EventArgs e)
         {
             try
             {
@@ -39,8 +39,10 @@ namespace RTD2660
                 {
                     buttonOpen.Text = "Open";
                     serialPortcComboBox.Enabled = true;
+                    buttonInfo.Enabled = false;
                     buttonErase.Enabled = false;
                     buttonFlash.Enabled = false;
+                    buttonSave.Enabled = false;
                     port.Close();
                 }
                 else
@@ -49,8 +51,10 @@ namespace RTD2660
                     port.Open();
                     buttonOpen.Text = "Close";
                     serialPortcComboBox.Enabled = false;
+                    buttonInfo.Enabled = true;
                     buttonErase.Enabled = true;
                     buttonFlash.Enabled = true;
+                    buttonSave.Enabled = true;
                 }
             }
             catch (System.SystemException ex)
@@ -84,7 +88,7 @@ namespace RTD2660
             serialPortcComboBox.SelectedIndex = serialPortcComboBox.Items.Count - 1;
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void buttonErase_Click(object sender, EventArgs e)
         {
             char[] cmd = { 'E' };
             port.Write(cmd, 0, 1);
@@ -94,7 +98,7 @@ namespace RTD2660
             label2.Text = "";
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void buttonFlash_Click(object sender, EventArgs e)
         {
             char[] cmd = { 'W' };
             port.Write(cmd, 0, 1);
@@ -183,11 +187,13 @@ namespace RTD2660
             debugTextBox.AppendText(info + "\n");
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void buttonLoadFile_Click(object sender, EventArgs e)
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 fileInputTextBox.Text = openFileDialog1.FileName;
+                fileInputTextBox.SelectionStart = fileInputTextBox.Text.Length;
+                fileInputTextBox.SelectionLength = 0;
             }
         }
 
@@ -197,6 +203,16 @@ namespace RTD2660
             port.Write(cmd, 0, 1);
             string info = port.ReadLine();
             debugTextBox.AppendText(info + "\n");
+        }
+
+        private void buttonSaveFile_Click(object sender, EventArgs e)
+        {
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                fileSaveTextBox.Text = saveFileDialog1.FileName;
+                fileSaveTextBox.SelectionStart = fileSaveTextBox.Text.Length;
+                fileSaveTextBox.SelectionLength = 0;
+            }
         }
     }
 }
