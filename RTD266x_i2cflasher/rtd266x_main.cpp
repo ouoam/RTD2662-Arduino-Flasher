@@ -9,6 +9,9 @@ static const FlashDesc FlashDevices[] = {
     {"W25X20"     , 0xEF3012,      256,       256, 64},
     {"W25X40"     , 0xEF3013,      512,       256, 64},
     {"W25X80"     , 0xEF3014, 1 * 1024,       256, 64},
+    // Manufacturer: Zbit Semiconductor 
+    {"ZB25VQ20"   , 0x5E6012,      256,       256, 64},
+    {"ZB25VQ40"   , 0x5E6013,      512,       256, 64},
     {NULL , 0, 0, 0, 0}
 };
 
@@ -282,5 +285,3 @@ bool ProgramFlash(uint32_t chip_size) {
   Serial.print(" Chip CRC "); Serial.print(chip_crc, HEX);
   return data_crc == chip_crc;
 }
-
-
