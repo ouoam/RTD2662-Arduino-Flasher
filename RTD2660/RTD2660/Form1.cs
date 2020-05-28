@@ -24,7 +24,7 @@ namespace RTD2660
             port = new SerialPort();
 
             // Allow the user to set the appropriate properties.
-            port.BaudRate = 115200;
+            port.BaudRate = 500000;
             // Set the read/write timeouts
             port.ReadTimeout = 900;
             port.WriteTimeout = 900;

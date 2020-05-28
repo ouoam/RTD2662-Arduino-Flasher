@@ -12,7 +12,6 @@
    Connect SCK, MOSI, MISO, CS -> MicroSD card
 */
 
-#include <SD.h>
 #include "Wire.h"
 #include "rtd266x_main.h"
 #if defined(__AVR__)
@@ -21,11 +20,6 @@
    }
 #endif
 
-
-#undef TWI_FREQ
-#define TWI_FREQ     200000     // only changed on AVR (shrug)
-
-
 bool chipConnected = false;
 
 FlashDesc chip;
@@ -33,9 +27,10 @@ FlashDesc chip;
 void setup(void) 
 {
   while (!Serial);
-  Serial.begin(115200);
+  Serial.begin(500000);
 
   Wire.begin();
+  Wire.setClock(400000);
 }
 
 uint8_t getch() {
