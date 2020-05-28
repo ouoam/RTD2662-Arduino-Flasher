@@ -70,4 +70,3 @@ bool ReadBytesFromAddr(uint8_t reg, uint8_t* dest, uint8_t len) {
   return true;
 }
 
-

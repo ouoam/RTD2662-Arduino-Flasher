@@ -22,13 +22,13 @@
 #endif
 
 
-#define SD_CS        4         // pin connected to SD chip select
+#undef TWI_FREQ
 #define TWI_FREQ     200000     // only changed on AVR (shrug)
 
 
 bool chipConnected = false;
 
-const FlashDesc* chip;
+FlashDesc chip;
   
 void setup(void) 
 {
@@ -47,7 +47,7 @@ void connection() {
 #if defined(__AVR__)
   uint8_t data;
   if (twi_writeTo(0x4A, &data, 0, 1, 1)) {
-    Serial.println("Couldn't find i2c device 0x4A");
+    Serial.println(F("Couldn't find i2c device 0x4A"));
     return;
   }
   //Serial.println(F("Found 0x4A"));
@@ -56,37 +56,37 @@ void connection() {
 #endif
 
   if (!WriteReg(0x6f, 0x80)) {  // Enter ISP mode
-    Serial.println("Write to 0x6F failed");
+    Serial.println(F("Write to 0x6F failed"));
     return;
   }
   uint8_t b = ReadReg(0x6f);
   if (!(b & 0x80)) {
-    Serial.println("Can't enable ISP mode");
+    Serial.println(F("Can't enable ISP mode"));
     return;
   }
   uint32_t jedec_id = SPICommonCommand(E_CC_READ, 0x9f, 3, 0, 0);
   Serial.print(F("JEDEC ID: 0x")); Serial.print(jedec_id, HEX);
-  chip = FindChip(jedec_id);
-  if (NULL == chip) {
-    Serial.println(" Unknown chip ID");
+  if (!FindChip(jedec_id, &chip)) {
+    Serial.println(F("Unknown chip ID"));
     return;
   }
   
-  Serial.print(" Manufacturer ");
-  uint32_t id = GetManufacturerId(chip->jedec_id);
+  Serial.print(F(" Manufacturer "));
+  uint32_t id = GetManufacturerId(chip.jedec_id);
   switch (id) {
-    case 0x20: Serial.print("ST");         break;
-    case 0xef: Serial.print("Winbond");    break;
-    case 0x1f: Serial.print("Atmel");      break;
-    case 0xc2: Serial.print("Macronix");   break;
-    case 0xbf: Serial.print("Microchip");  break;
-    default:   Serial.print("Unknown");    break;
+    case 0x20: Serial.print(F("ST"));         break;
+    case 0xef: Serial.print(F("Winbond"));    break;
+    case 0x1f: Serial.print(F("Atmel"));      break;
+    case 0xc2: Serial.print(F("Macronix"));   break;
+    case 0xbf: Serial.print(F("Microchip"));  break;
+    case 0x5e: Serial.print(F("Zbit"));       break;
+    default:   Serial.print(F("Unknown"));    break;
   }
 
-  Serial.print(" Chip: ");      Serial.print(chip->device_name);
-  Serial.print(" Size (KB): "); Serial.print(chip->size_kb);
-  Serial.println("");
-  SetupChipCommands(chip->jedec_id);
+  Serial.print(F(" Chip: "));      Serial.print(chip.device_name);
+  Serial.print(F(" Size (KB): ")); Serial.print(chip.size_kb);
+  Serial.println();
+  SetupChipCommands(chip.jedec_id);
   chipConnected = true;
 }
 
@@ -95,7 +95,7 @@ void erase() {
 }
 
 void flash() {
-ProgramFlash(chip->size_kb * 1024);
+ProgramFlash(chip.size_kb * 1024);
 
   /*
   bool finished = false;
@@ -126,14 +126,14 @@ void loop(void)
   switch (cmd) {
     case 'E':
       erase();
-      Serial.println("Erase OK");
+      Serial.println(F("Erase OK"));
       break;
     case 'W':
       flash();
-      Serial.println("Flash OK");
+      Serial.println(F("Flash OK"));
       break;
     case 'I':
-      Serial.println("RTD FLASH TOOL");
+      Serial.println(F("RTD FLASH TOOL"));
       break;
     case 'C':
       connection();
@@ -152,7 +152,7 @@ void loop(void)
      }
     
     Serial.println(F("Dumping FLASH to disk"));
-     if (! SaveFlash(&dataFile, chip->size_kb * 1024)) {
+     if (! SaveFlash(&dataFile, chip.size_kb * 1024)) {
       Serial.println(F("**** FAILED ****"));
     }
     Serial.println(F("OK!"));
@@ -177,6 +177,3 @@ void loop(void)
   }  
   */
 }
-
-
-

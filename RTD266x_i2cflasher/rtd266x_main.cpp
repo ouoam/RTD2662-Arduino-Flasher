@@ -2,13 +2,48 @@
 #include "rtd266x_main.h"
 
 
-static const FlashDesc FlashDevices[] = {
+static const FlashDesc FlashDevices[] PROGMEM = {
     // name,        Jedec ID,    sizeK, page size, block sizeK
+    {"AT25DF041A" , 0x1F4401,      512,       256, 64},
+    {"AT25DF161"  , 0x1F4602, 2 * 1024,       256, 64},
+    {"AT26DF081A" , 0x1F4501, 1 * 1024,       256, 64},
+    {"AT26DF0161" , 0x1F4600, 2 * 1024,       256, 64},
+    {"AT26DF161A" , 0x1F4601, 2 * 1024,       256, 64},
+    {"AT25DF321" ,  0x1F4701, 4 * 1024,       256, 64},
+    {"AT25DF512B" , 0x1F6501,       64,       256, 32},
+    {"AT25DF512B" , 0x1F6500,       64,       256, 32},
+    {"AT25DF021"  , 0x1F3200,      256,       256, 64},
+    {"AT26DF641" ,  0x1F4800, 8 * 1024,       256, 64},
+    // Manufacturer: ST 
+    {"M25P05"     , 0x202010,       64,       256, 32},
+    {"M25P10"     , 0x202011,      128,       256, 32},
+    {"M25P20"     , 0x202012,      256,       256, 64},
+    {"M25P40"     , 0x202013,      512,       256, 64},
+    {"M25P80"     , 0x202014, 1 * 1024,       256, 64},
+    {"M25P16"     , 0x202015, 2 * 1024,       256, 64},
+    {"M25P32"     , 0x202016, 4 * 1024,       256, 64},
+    {"M25P64"     , 0x202017, 8 * 1024,       256, 64},
     // Manufacturer: Windbond 
     {"W25X10"     , 0xEF3011,      128,       256, 64},
     {"W25X20"     , 0xEF3012,      256,       256, 64},
     {"W25X40"     , 0xEF3013,      512,       256, 64},
     {"W25X80"     , 0xEF3014, 1 * 1024,       256, 64},
+    {"W25X16"     , 0xEF3015,  32 * 64,       256, 64},
+    {"W25X32"     , 0xEF3016,  64 * 64,       256, 64},
+    {"W25X64"     , 0xEF3017, 128 * 64,       256, 64},
+    {"W25Q80"     , 0xEF5014,  16 * 64,       256, 64},
+    {"W25Q80BL"   , 0xEF4014,  16 * 64,       256, 64},
+    {"W25Q16"     , 0xEF4015,  32 * 64,       256, 64},
+    {"W25Q32"     , 0xEF4016,  64 * 64,       256, 64},
+    {"W25Q64"     , 0xEF4017, 128 * 64,       256, 64},
+    // Manufacturer: Macronix 
+    {"MX25L512"   , 0xC22010,       64,       256, 64},
+    {"MX25L3205"  , 0xC22016, 4 * 1024,       256, 64},
+    {"MX25L6405"  , 0xC22017, 8 * 1024,       256, 64},
+    {"MX25L8005"  , 0xC22014,     1024,       256, 64},
+    // Microchip
+    {"SST25VF512" , 0xBF4800,       64,       256, 32},
+    {"SST25VF032" , 0xBF4A00, 4 * 1024,       256, 32},
     // Manufacturer: Zbit Semiconductor 
     {"ZB25VQ20"   , 0x5E6012,      256,       256, 64},
     {"ZB25VQ40"   , 0x5E6013,      512,       256, 64},
@@ -87,14 +122,15 @@ void SPIRead(uint32_t address, uint8_t *data, int32_t len) {
 
 
 
-const FlashDesc* FindChip(uint32_t jedec_id) {
-  const FlashDesc* chip = FlashDevices;
-  while (chip->jedec_id != 0) {
+bool FindChip(uint32_t jedec_id, FlashDesc* chip) {
+  int i = 0;
+  do {
+    memcpy_P(chip, &FlashDevices[i], sizeof(FlashDesc));
     if (chip->jedec_id == jedec_id)
-      return chip;
-    chip++;
-  }
-  return NULL;
+      return true;
+    i++;
+  } while (chip->jedec_id != 0);
+  return false;
 }
 
 
@@ -200,7 +236,7 @@ bool ShouldProgramPage(uint8_t* buffer, uint32_t size) {
 }
 
 
-bool EraseFlash(void) {
+void EraseFlash() {
   //Serial.println(F("Erasing..."));
   SPICommonCommand(E_CC_WRITE_AFTER_EWSR, 1, 0, 1, 0); // Unprotect the Status Register
   SPICommonCommand(E_CC_WRITE_AFTER_WREN, 1, 0, 1, 0); // Unprotect the flash
@@ -281,7 +317,7 @@ bool ProgramFlash(uint32_t chip_size) {
 
   uint8_t data_crc = GetCRC();
   uint8_t chip_crc = SPIComputeCRC(0, addr - 1);
-  Serial.print("Received data CRC "); Serial.print(data_crc, HEX);
-  Serial.print(" Chip CRC "); Serial.print(chip_crc, HEX);
+  Serial.print(F("Received data CRC ")); Serial.println(data_crc, HEX);
+  Serial.print(F("Chip CRC ")); Serial.println(chip_crc, HEX);
   return data_crc == chip_crc;
 }

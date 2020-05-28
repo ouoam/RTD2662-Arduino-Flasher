@@ -22,4 +22,3 @@ void ProcessCRC(const uint8_t *data, int len)
 uint8_t GetCRC() {
   return (uint8_t)(gCrc >> 8);
 }
-
