@@ -26,8 +26,8 @@ namespace RTD2660
             // Allow the user to set the appropriate properties.
             port.BaudRate = 250000;
             // Set the read/write timeouts
-            port.ReadTimeout = 900;
-            port.WriteTimeout = 900;
+            port.ReadTimeout = 2000;
+            port.WriteTimeout = 2000;
 
         }
 
@@ -147,12 +147,12 @@ namespace RTD2660
                             catch (System.TimeoutException ex)
                             {
                                 error = true;
+                                debugTextBox.AppendText("Time\r\n");
                             }
-
 
                             if (error)
                             {
-                                debugTextBox.AppendText(String.Format("Errror at {0}\n", numBytesRead));
+                                debugTextBox.AppendText(String.Format("Errror at {0}\r\n", numBytesRead));
                                 break;
                             }
                             else
@@ -160,10 +160,10 @@ namespace RTD2660
                                 label2.Text = String.Format("Flashed {0} of {1}", numBytesRead, fsSource.Length);
                                 progressBar.Value = (numBytesRead * 100 / (int)fsSource.Length);
                             }
+                            Application.DoEvents();
                         }
                         if (error)
                             break;
-                        Application.DoEvents();
 
                         //port.Write(bytes, 0, bytes.Length);
 
@@ -253,6 +253,9 @@ namespace RTD2660
                             error = true;
                         }
 
+                        char[] b = { 'g' };
+                        port.Write(b, 0, 1);
+
                         if (error)
                         {
                             debugTextBox.AppendText(String.Format("Errror at {0}\n", numBytesRead));
@@ -277,9 +280,6 @@ namespace RTD2660
                                 gCrc <<= 1;
                             }
                         }
-
-                        char[] b = { 'g' };
-                        port.Write(b, 0, 1);
 
                         numBytesRead += 128;
 

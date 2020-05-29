@@ -160,6 +160,7 @@ void SetupChipCommands(uint32_t jedec_id) {
   uint8_t manufacturer_id = GetManufacturerId(jedec_id);
   switch (manufacturer_id) {
   case 0xEF:
+  case 0x5E:
     // These are the codes for Winbond
     WriteReg(0x62, 0x6);  // Flash Write enable op code
     WriteReg(0x63, 0x50); // Flash Write register op code
@@ -285,7 +286,6 @@ bool ProgramFlash(uint32_t chip_size) {
     }
       
     for (int j = 0; j < 8; j++) {
-      
       for (int i = 0; i < 32; i++) {
           while (!Serial.available());
           buffer[i + (j*32)] = Serial.read();
