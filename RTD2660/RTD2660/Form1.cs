@@ -117,6 +117,8 @@ namespace RTD2660
                     // Read the source file into a byte array.
                     int numBytesToRead = (int)fsSource.Length;
                     int numBytesRead = 0;
+
+                    progressBar.Maximum = numBytesToRead;
                     while (numBytesToRead > 0)
                     {
                         for (int i = 0; i < bytes.Length; i++)
@@ -134,6 +136,12 @@ namespace RTD2660
                         port.Write(b, 0, 1);
 
                         bool error = false;
+
+                        if (n == 0)
+                        {
+                            break;
+                        }
+                        
                         for (int j = 0; j < 8; j++)
                         {
                             port.Write(bytes, j * 32, 32);
@@ -158,7 +166,7 @@ namespace RTD2660
                             else
                             {
                                 label2.Text = String.Format("Flashed {0} of {1}", numBytesRead, fsSource.Length);
-                                progressBar.Value = (numBytesRead * 100 / (int)fsSource.Length);
+                                progressBar.Value = numBytesRead;
                             }
                             Application.DoEvents();
                         }
@@ -170,8 +178,7 @@ namespace RTD2660
                         // Break when the end of the file is reached.
 
                         //numBytesToRead -= n;
-                        if (n == 0)
-                            break;
+                        
                     }
                     fsSource.Close();
                 }
@@ -230,6 +237,8 @@ namespace RTD2660
             info = port.ReadLine();
             UInt32 len = UInt32.Parse(info);
 
+            progressBar.Maximum = (int)len;
+
             byte[] bytes = new byte[128];
             uint gCrc = 0;
             try
@@ -258,7 +267,7 @@ namespace RTD2660
 
                         if (error)
                         {
-                            debugTextBox.AppendText(String.Format("Errror at {0}\n", numBytesRead));
+                            debugTextBox.AppendText(String.Format("Errror at {0}\r\n", numBytesRead));
                             break;
                         }
 
@@ -284,7 +293,7 @@ namespace RTD2660
                         numBytesRead += 128;
 
                         label2.Text = String.Format("Loaded {0}", numBytesRead);
-                        progressBar.Value = ((int)(numBytesRead * 100 / len));
+                        progressBar.Value = numBytesRead;
 
                         Application.DoEvents();
 
@@ -303,7 +312,7 @@ namespace RTD2660
             }
 
             info = port.ReadLine();
-            debugTextBox.AppendText(info + String.Format(" Program CRC {0:X}", (uint)(gCrc >> 8)) + "\n\r");
+            debugTextBox.AppendText(info + String.Format(" Program CRC {0:X}", (uint)(gCrc >> 8)) + "\r\n");
         }
     }
 }

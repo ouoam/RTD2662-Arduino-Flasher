@@ -311,7 +311,7 @@ bool ProgramFlash(uint32_t chip_size) {
     }
     ProcessCRC(buffer, sizeof(buffer));
     addr += sizeof(buffer);
-  } while ((addr < chip_size));
+  } while (addr < chip_size);
 
   // Wait for programming cycle to finish
   do {
