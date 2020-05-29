@@ -135,50 +135,40 @@ namespace RTD2660
                         byte[] b = { (byte)n };
                         port.Write(b, 0, 1);
 
-                        bool error = false;
-
                         if (n == 0)
                         {
                             break;
                         }
-                        
-                        for (int j = 0; j < 8; j++)
+
+                        bool error = false;
+
+                        try
                         {
-                            port.Write(bytes, j * 32, 32);
-
-                            Thread.Sleep(1);
-                            try
-                            {
-                                char answer = (char)port.ReadChar();
-                                error = answer != '1';
-                            }
-                            catch (System.TimeoutException ex)
-                            {
-                                error = true;
-                                debugTextBox.AppendText("Time\r\n");
-                            }
-
-                            if (error)
-                            {
-                                debugTextBox.AppendText(String.Format("Errror at {0}\r\n", numBytesRead));
-                                break;
-                            }
-                            else
-                            {
-                                label2.Text = String.Format("Flashed {0} of {1}", numBytesRead, fsSource.Length);
-                                progressBar.Value = numBytesRead;
-                            }
-                            Application.DoEvents();
+                            char answer = (char)port.ReadChar();
+                            error = answer != '1';
                         }
+                        catch (System.TimeoutException ex)
+                        {
+                            error = true;
+                            debugTextBox.AppendText("Time\r\n");
+                        }
+
+                        if (error)
+                        {
+                            debugTextBox.AppendText(String.Format("Errror at {0}\r\n", numBytesRead));
+                            break;
+                        }
+                        else
+                        {
+                            label2.Text = String.Format("Flashed {0} of {1}", numBytesRead, fsSource.Length);
+                            progressBar.Value = numBytesRead;
+                        }
+
+                        Application.DoEvents();
                         if (error)
                             break;
 
-                        //port.Write(bytes, 0, bytes.Length);
-
-                        // Break when the end of the file is reached.
-
-                        //numBytesToRead -= n;
-                        
+                        port.Write(bytes, 0, bytes.Length);
                     }
                     fsSource.Close();
                 }
@@ -239,7 +229,7 @@ namespace RTD2660
 
             progressBar.Maximum = (int)len;
 
-            byte[] bytes = new byte[128];
+            byte[] bytes = new byte[256];
             uint gCrc = 0;
             try
             {
@@ -272,7 +262,7 @@ namespace RTD2660
                         }
 
                         //port.Read(bytes, 0, 128);
-                        for (int i = 0; i < 128; i++)
+                        for (int i = 0; i < 256; i++)
                         {
                             int a = -1;
                             while (a == -1)
@@ -290,14 +280,14 @@ namespace RTD2660
                             }
                         }
 
-                        numBytesRead += 128;
+                        numBytesRead += 256;
 
                         label2.Text = String.Format("Loaded {0}", numBytesRead);
                         progressBar.Value = numBytesRead;
 
                         Application.DoEvents();
 
-                        fsSource.Write(bytes, 0, 128);
+                        fsSource.Write(bytes, 0, 256);
                     }
                     fsSource.Close();
                 }

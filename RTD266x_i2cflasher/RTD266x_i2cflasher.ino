@@ -30,7 +30,7 @@ void setup(void)
   Serial.begin(250000);
 
   Wire.begin();
-  Wire.setClock(200000);
+  Wire.setClock(400000);
 }
 
 void connection() {
@@ -81,7 +81,7 @@ void connection() {
 }
 
 void erase() {
-  Serial.println(F("Erasing..."));
+  Serial.print(F("Erasing..."));
   EraseFlash();
   Serial.println(F("done"));
 }

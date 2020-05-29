@@ -177,7 +177,7 @@ void SetupChipCommands(uint32_t jedec_id) {
 
 
 bool SaveFlash(uint32_t chip_size) {
-  uint8_t buffer[128];
+  uint8_t buffer[256];
   uint32_t addr = 0;
   InitCRC();
   Serial.println(chip_size);
@@ -186,7 +186,7 @@ bool SaveFlash(uint32_t chip_size) {
     // Serial.print(F("Reading addr $")); Serial.println(addr, HEX);
     Serial.write('r');
     SPIRead(addr, buffer, sizeof(buffer));
-    Serial.write(buffer, 128);
+    Serial.write(buffer, sizeof(buffer));
     
     ProcessCRC(buffer, sizeof(buffer));
     addr += sizeof(buffer);
@@ -281,18 +281,12 @@ bool ProgramFlash(uint32_t chip_size) {
     while (!Serial.available());
     char len =  Serial.read();
     if (len == 0) {
-      Serial.print('1');
       break;
     }
-      
-    for (int j = 0; j < 8; j++) {
-      for (int i = 0; i < 32; i++) {
-          while (!Serial.available());
-          buffer[i + (j*32)] = Serial.read();
-      }
-      Serial.print('1');
-    }
 
+    Serial.print('1');
+    Serial.readBytes(buffer, sizeof(buffer));
+    
     if (ShouldProgramPage(buffer, sizeof(buffer))) {
       // Set program size-1
       WriteReg(0x71, 255);
