@@ -20,8 +20,6 @@
    }
 #endif
 
-bool chipConnected = false;
-
 FlashDesc chip;
   
 void setup(void) 
@@ -77,7 +75,6 @@ void connection() {
   Serial.print(F(" Size (KB): ")); Serial.print(chip.size_kb);
   Serial.println();
   SetupChipCommands(chip.jedec_id);
-  chipConnected = true;
 }
 
 void erase() {
@@ -87,22 +84,14 @@ void erase() {
 }
 
 void flash() {
-  if (!chipConnected) {
-    Serial.print(F("Not ready to Flash. Connect..."));
-    connection();
-  } else {
-    Serial.println(F("Ready to Flash."));
-  }
+  Serial.print(F("Connect..."));
+  connection();
   ProgramFlash(chip.size_kb * 1024);
 }
 
 void save() {
-  if (!chipConnected) {
-    Serial.print(F("Not ready to read. Connect..."));
-    connection();
-  } else {
-    Serial.println(F("Ready to read."));
-  }
+  Serial.print(F("Connect..."));
+  connection();
   SaveFlash(chip.size_kb * 1024);
 }
 
