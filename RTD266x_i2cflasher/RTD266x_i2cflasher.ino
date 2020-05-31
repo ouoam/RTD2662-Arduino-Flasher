@@ -118,6 +118,13 @@ void loop(void)
     case 'C':
       connection();
       break;
+    case 'A':
+      connection();
+      WriteReg(0x08, 0x82);
+      while (ReadReg(0x08) & 0x80) {
+        
+      }
+      Serial.println(ReadReg(0x09 + 3) >> 2);
   }
   //Serial.print(millis() - starttime); Serial.println(F(" ms"));
   /*
