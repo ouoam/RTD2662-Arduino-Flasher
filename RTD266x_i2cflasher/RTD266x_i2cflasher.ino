@@ -87,12 +87,14 @@ void flash() {
   Serial.print(F("Connect..."));
   connection();
   ProgramFlash(chip.size_kb * 1024);
+  WriteReg(0xEE, 0x02);
 }
 
 void save() {
   Serial.print(F("Connect..."));
   connection();
   SaveFlash(chip.size_kb * 1024);
+  WriteReg(0xEE, 0x02);
 }
 
 void loop(void) 
