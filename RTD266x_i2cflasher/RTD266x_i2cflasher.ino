@@ -19,6 +19,9 @@
      #include "utility/twi.h"  // from Wire library, so we can do bus scanning
    }
 #endif
+#include <SoftwareSerial.h>
+
+SoftwareSerial mySerial(A4, A5); // RX, TX
 
 FlashDesc chip;
   
@@ -97,37 +100,84 @@ void save() {
   WriteReg(0xEE, 0x02);
 }
 
+char getch() {
+  while (!Serial.available());
+  return Serial.read();
+}
+
+#define hex2int(d) (d <= '9' ? d - '0' : d - 'A' + 10)
+uint8_t hex2int8(uint8_t d1, uint8_t d2) {
+  return hex2int(d2) << 4 | hex2int(d1) & 0xF;
+}
+
+uint8_t willCloseDebug = 0;
+uint32_t st = 0;
+
 void loop(void) 
 {
-  while (!Serial.available());
-  char cmd = Serial.read();
-  
-  uint32_t starttime = millis();
-  
-  switch (cmd) {
-    case 'E':
-      erase();
-      break;
-    case 'W':
-      flash();
-      break;
-    case 'S':
-      save();
-      break;
-    case 'I':
-      Serial.println(F("RTD FLASH TOOL"));
-      break;
-    case 'C':
-      connection();
-      break;
-    case 'A':
-      connection();
-      WriteReg(0x08, 0x82);
-      while (ReadReg(0x08) & 0x80) {
-        
-      }
-      Serial.println(ReadReg(0x09 + 3) >> 2);
+  if (Serial.available()) {
+    char cmd = Serial.read();
+    
+    uint32_t starttime = millis();
+    
+    switch (cmd) {
+      case 'E':
+        erase();
+        break;
+      case 'W':
+        flash();
+        break;
+      case 'S':
+        save();
+        break;
+      case 'I':
+        Serial.println(F("RTD FLASH TOOL"));
+        break;
+      case 'C':
+        connection();
+        break;
+      case 'A':
+        connection();
+        WriteReg(0x08, 0x82);
+        while (ReadReg(0x08) & 0x80) {
+          
+        }
+        Serial.println(ReadReg(0x09 + 3) >> 2);
+        break;
+      case 'D':
+        Wire.end();
+        mySerial.begin(19200);
+        Serial.println("Open UART");
+        break;
+      case 'd':
+        st = millis();
+        mySerial.write(0x40 + 0xB0);
+        willCloseDebug = 1;
+      default:
+        mySerial.write(cmd);
+    }
   }
+
+  if (willCloseDebug != 0 && st + 200 < millis()) {
+    Serial.println("Close again");
+    mySerial.write(0xF0);
+    st = millis();
+  }
+
+  while (mySerial.available()) {
+    uint8_t tmp = mySerial.read();
+    Serial.write(tmp);
+    if (willCloseDebug == 1 && tmp == 'O') willCloseDebug = 2;
+    if (willCloseDebug == 2 && tmp == 'K') willCloseDebug = 3;
+  }
+
+  if (willCloseDebug == 3) {
+    mySerial.end();
+    Wire.begin();
+    Serial.println("Close UART");
+    willCloseDebug = 0;
+  }
+  
   //Serial.print(millis() - starttime); Serial.println(F(" ms"));
   /*
   if (cmd == 'R') {
